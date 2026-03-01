@@ -1,0 +1,81 @@
+# ============================================================
+# 3D Print Failure Detection - Configuration
+# ============================================================
+
+# --- Model ---
+model:
+  # Path to trained YOLOv8 weights
+  # After training, this will be at: runs/detect/print_failure_detector/weights/best.pt
+  weights: "runs/detect/print_failure_detector/weights/best.pt"
+  # Base model for training (yolov8n, yolov8s, yolov8m, yolov8l, yolov8x)
+  base_model: "yolov8n.pt"
+
+# --- Training ---
+training:
+  epochs: 50
+  image_size: 640
+  batch_size: 16
+  patience: 10           # Early stopping patience
+  project_name: "print_failure_detector"
+
+# --- Dataset ---
+dataset:
+  # Roboflow workspace and project identifiers
+  workspace: "max-wkf8k"
+  project: "3d-print-failure-detection"
+  version: 1
+  format: "yolov8"
+
+# --- Camera ---
+camera:
+  # Camera index: 0 = default, 1 = USB webcam
+  # For IP cameras, use RTSP URL: "rtsp://user:pass@192.168.1.10:554/stream"
+  index: 0
+
+# --- Detection ---
+detection:
+  # Minimum confidence score to trigger detection (0.0 - 1.0)
+  # Lower = more sensitive (more false positives)
+  # Higher = less sensitive (may miss real failures)
+  confidence_threshold: 0.5
+
+  # Seconds to wait before re-alerting for the same failure type
+  alert_cooldown: 60
+
+# --- Actions ---
+actions:
+  # Automatically stop the printer when spaghetti is detected
+  stop_on_spaghetti: true
+
+  # Method to stop the printer:
+  # "printcore" = send G-code via USB (requires Printrun)
+  # "relay"     = cut power via WiFi smart plug (ESP8266/Tasmota)
+  stop_method: "printcore"
+
+  # Show live detection window (set to false for headless/server)
+  display: true
+
+# --- Printer (for printcore method) ---
+printer:
+  # Serial port
+  # Linux:   /dev/ttyUSB0
+  # macOS:   /dev/tty.usbserial-*
+  # Windows: COM3
+  port: "/dev/ttyUSB0"
+  baud_rate: 115200
+
+# --- WiFi Relay (for relay method) ---
+relay:
+  # IP address of Tasmota-flashed smart plug
+  ip: "192.168.1.100"
+
+# --- Alerts ---
+alerts:
+  # Save alert frames to disk
+  save_frames: true
+  save_directory: "alerts"
+
+  # Telegram Bot (future integration)
+  # telegram:
+  #   bot_token: "YOUR_BOT_TOKEN"
+  #   chat_id: "YOUR_CHAT_ID"

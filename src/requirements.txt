@@ -1,0 +1,6 @@
+ultralytics>=8.0.0
+roboflow>=1.0.0
+opencv-python>=4.8.0
+Printrun>=2.0.0
+PyYAML>=6.0
+requests>=2.28.0
