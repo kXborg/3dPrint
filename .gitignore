@@ -1,1 +1,36 @@
 Dataset
+# Environments
+venv/
+print_detect_env/
+.env
+
+# Training outputs
+runs/
+wandb/
+
+# Dataset downloads
+3d-print-failure-detection-*/
+
+# Alert frames
+alerts/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+src/yolo26n.pt
+src/yolov8n.pt
