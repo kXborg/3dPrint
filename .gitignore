@@ -34,3 +34,7 @@ Thumbs.db
 
 src/yolo26n.pt
 src/yolov8n.pt
+
+src/3D-printing-failure-1/
+src/yolo26s.pt
+src/yolov8m.pt

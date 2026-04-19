@@ -1,20 +1,74 @@
 import os
 import random
+import colorsys
+import yaml
 import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw, ImageFont
 
-# Class names from data.yaml
-CLASS_NAMES = ['spaghetti', 'stringing', 'warping']
-CLASS_COLORS = [(255, 50, 50), (50, 200, 50), (80, 120, 255)]  # Red, Green, Blue
+# Dataset root directory
+DATASET_DIR = os.path.join(os.path.dirname(__file__), "3D-printing-failure-1")
 
-def show_samples(split_path, n=5):
+def load_dataset_config(dataset_dir):
+    """Load class names and split paths from data.yaml."""
+    yaml_path = os.path.join(dataset_dir, "data.yaml")
+    with open(yaml_path) as f:
+        config = yaml.safe_load(f)
+
+    class_names = config["names"]
+    nc = config.get("nc", len(class_names))
+
+    # Generate visually distinct colors for each class
+    colors = []
+    for i in range(nc):
+        hue = i / nc
+        r, g, b = colorsys.hls_to_rgb(hue, 0.45, 0.85)
+        colors.append((int(r * 255), int(g * 255), int(b * 255)))
+
+    # Resolve split paths relative to dataset_dir
+    splits = {}
+    for key in ("train", "val", "test"):
+        if key in config:
+            raw = config[key]  # e.g. "../train/images"
+            resolved = os.path.normpath(os.path.join(dataset_dir, raw))
+            # Strip trailing /images so split_path points to the split root
+            if resolved.endswith(os.sep + "images") or resolved.endswith("/images"):
+                resolved = os.path.dirname(resolved)
+            splits[key] = resolved
+
+    return class_names, colors, splits
+
+
+CLASS_NAMES, CLASS_COLORS, SPLITS = load_dataset_config(DATASET_DIR)
+
+
+def show_samples(split="train", n=5, dataset_dir=None):
     """
     Display random annotated images from a dataset split.
 
     Args:
-        split_path: Path to a split folder (e.g. '3d-print-failure-detection-1/train')
+        split: Name of the split ('train', 'val', or 'test'), a dataset
+               directory path (containing data.yaml), or a direct path
+               to a split folder.
         n: Number of images to display (default 5)
+        dataset_dir: Optional override for the dataset root directory.
     """
+    if dataset_dir:
+        names, colors, splits = load_dataset_config(dataset_dir)
+    else:
+        names, colors, splits = CLASS_NAMES, CLASS_COLORS, SPLITS
+
+    # If split is a dataset directory (contains data.yaml), load it and default to "train"
+    candidate = os.path.join(os.path.dirname(__file__), split) if not os.path.isabs(split) else split
+    if os.path.isfile(os.path.join(candidate, "data.yaml")):
+        names, colors, splits = load_dataset_config(candidate)
+        split = "train"
+
+    # Accept either a split name or a direct path
+    if split in splits:
+        split_path = splits[split]
+    else:
+        split_path = split  # assume it's a direct path
+
     img_dir = os.path.join(split_path, "images")
     lbl_dir = os.path.join(split_path, "labels")
     images = [f for f in os.listdir(img_dir) if f.endswith(('.jpg', '.jpeg', '.png'))]
@@ -40,8 +94,8 @@ def show_samples(split_path, n=5):
                     parts = line.strip().split()
                     cls_id = int(parts[0])
                     vals = list(map(float, parts[1:]))
-                    color = CLASS_COLORS[cls_id]
-                    label = CLASS_NAMES[cls_id]
+                    color = colors[cls_id]
+                    label = names[cls_id]
 
                     if len(vals) == 4:
                         # Bounding box format: x_center y_center width height
@@ -69,7 +123,7 @@ def show_samples(split_path, n=5):
                     draw.text((tx + 2, ty - 13), label, fill="white")
 
         ax.imshow(img)
-        ax.set_title(os.path.basename(split_path), fontsize=11)
+        ax.set_title(split if split in splits else os.path.basename(split_path), fontsize=11)
         ax.axis("off")
 
     # Hide unused axes
