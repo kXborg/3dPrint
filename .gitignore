@@ -1,5 +1,6 @@
 Dataset
 # Environments
+.venv/
 venv/
 print_detect_env/
 .env
