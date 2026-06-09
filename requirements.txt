@@ -1,0 +1,17 @@
+# 3D Print AI Dashboard Requirements
+
+# Print Control
+Printrun>=2.2.0
+pyserial>=3.5
+
+# UI
+gradio>=4.0.0
+
+# Computer Vision & AI
+opencv-python>=4.8.0
+ultralytics>=8.0.0
+numpy>=1.26.0
+
+# Utilities
+PyYAML>=6.0
+requests>=2.31.0
